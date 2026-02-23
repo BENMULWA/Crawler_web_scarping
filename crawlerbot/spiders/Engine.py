@@ -6,29 +6,34 @@ from pymongo import MongoClient
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from scrapy.selector import Selector
+from dotenv import load_dotenv
+import os
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from twisted.internet.error import TimeoutError, TCPTimedOutError
 
+# 1. intializing the scrapy through the class FXSpider
 class FXSpider(scrapy.Spider):
     name = "engine"
     custom_settings = {
-        "DOWNLOAD_TIMEOUT": 15,  # allow slower pages
+        "DOWNLOAD_TIMEOUT": 15,  # allow slower pages to give a response 
         "RETRY_ENABLED": False,  # no automatic retries
-        "CONCURRENT_REQUESTS": 5,
-        "CONCURRENT_REQUESTS_PER_DOMAIN": 5,
+        "CONCURRENT_REQUESTS": 5, # total no of requests to happen at once.
+        "CONCURRENT_REQUESTS_PER_DOMAIN": 5, # limits on how many requets go on same domain on same time. 
     }
 
     supported_currency = ["USD", "UGX", "TZS", "KES", "ZAR", "GBP", "EUR"]
 
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, *args, **kwargs):  #inhheritence constructor to show all logs, signals 
         super().__init__(*args, **kwargs)
 
-        # Connect to MongoDB
-        client = MongoClient(
-            "mongodb+srv://scrapy-selenium:benard9507@cluster0.xad7ngd.mongodb.net/?retryWrites=true&w=majority"
-        )
+        # Connect to MongoDB via environment variable handler
+        load_dotenv()
+        MONGO_URI = os.getenv("MONGO_URI")
+        client = MongoClient(MONGO_URI)
+    
         db = client["Currency_ratesDB_Crawler"]
         self.collection = db["CrawlerBot_Scraping data"]
 
@@ -88,7 +93,7 @@ class FXSpider(scrapy.Spider):
 
             # Save exact rate
             self.fx_dict.setdefault(base, {})[target] = float(rate)
-            self.logger.info(f"✅ {base}->{target}: {rate}")
+            self.logger.info(f"✅OK {base}->{target}: {rate}")
 
         except Exception as e:
             self.logger.warning(f"Could not fetch rate for {base}->{target}: {e}")
@@ -108,5 +113,5 @@ class FXSpider(scrapy.Spider):
         with open(f"fx_rates_{datetime.utcnow().isoformat()}.json", "w") as f:
             json.dump(final_doc, f, indent=4)
 
-        self.driver.quit()
+        self.driver.quit() # quites driver selenium
         self.logger.info(f"✅ FX rates saved for run {final_doc['_id']}! Total bases: {len(self.fx_dict)}")

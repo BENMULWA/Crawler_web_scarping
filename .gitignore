@@ -1,0 +1,37 @@
+# Generated FX rate files
+fx_rates_*.json
+fx_rates.json
+currency_rates.json
+
+
+# Virtual environment
+
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
+
+# Local configs
+.env
+*.env
+
+# Scrapy output files
+*.json
+*.jl
+*.csv
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
