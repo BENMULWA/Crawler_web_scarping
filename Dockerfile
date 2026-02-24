@@ -4,6 +4,8 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system dependencies for Selenium + Chrome
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y \
     wget gnupg unzip curl \
     chromium chromium-driver \
