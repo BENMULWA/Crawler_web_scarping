@@ -1,0 +1,36 @@
+
+# composes all servives (orchestration) for the app and crawler 
+
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: xe-web-scraping-app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+    
+  crawler:
+    build: .
+    container_name: fx-crawler
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    command: scrapy crawl engine
+
+
+  crawler-scheduler:
+    build: .
+    container_name: crawler-scheduler
+    env_file:
+    - .env
+    volumes:
+    - .:/app
+    command: ["sh", "-c", "echo '0 * * * * scrapy crawl engine' | crontab - && crond -f"]
